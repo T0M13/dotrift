@@ -14,16 +14,19 @@
 import { createDotrift } from './dotrift.js';
 
 const ATTR_MAP = {
-  'data-grid':          ['grid',         Number],
-  'data-dot-size':      ['dotSize',      Number],
-  'data-repel-radius':  ['repelRadius',  Number],
-  'data-repel-force':   ['repelForce',   Number],
-  'data-friction':      ['friction',     Number],
-  'data-spring':        ['spring',       Number],
-  'data-ring-strength': ['ringStrength', Number],
-  'data-ring-speed':    ['ringSpeed',    Number],
-  'data-ring-width':    ['ringWidth',    Number],
-  'data-background':    ['background',   String],
+  'data-grid':           ['grid',          Number],
+  'data-dot-size':       ['dotSize',       Number],
+  'data-repel-radius':   ['repelRadius',   Number],
+  'data-repel-force':    ['repelForce',    Number],
+  'data-friction':       ['friction',      Number],
+  'data-spring':         ['spring',        Number],
+  'data-ring-strength':  ['ringStrength',  Number],
+  'data-ring-speed':     ['ringSpeed',     Number],
+  'data-ring-width':     ['ringWidth',     Number],
+  'data-idle-animation': ['idleAnimation', String],
+  'data-idle-strength':  ['idleStrength',  Number],
+  'data-idle-speed':     ['idleSpeed',     Number],
+  'data-background':     ['background',    String],
 };
 
 function initImage(img) {
