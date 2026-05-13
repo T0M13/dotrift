@@ -1,17 +1,17 @@
 /**
- * particle-fx auto-init
+ * dotrift auto-init
  *
- * Add data-particle-fx to any <img> and the effect is applied automatically.
+ * Add data-dotrift to any <img> and the effect is applied automatically.
  * No JavaScript needed beyond including this file.
  *
  * @example
- * <img data-particle-fx src="photo.jpg" />
+ * <img data-dotrift src="photo.jpg" />
  *
  * Override any config option via data attributes:
- * <img data-particle-fx data-grid="80" data-repel-radius="40" src="photo.jpg" />
+ * <img data-dotrift data-grid="80" data-repel-radius="40" src="photo.jpg" />
  */
 
-import { createParticleFX } from './particle-fx.js';
+import { createDotrift } from './dotrift.js';
 
 const ATTR_MAP = {
   'data-grid':          ['grid',         Number],
@@ -55,11 +55,11 @@ function initImage(img) {
 
   cfg.onReady = () => { img.style.display = 'none'; };
 
-  createParticleFX(canvas, img.src, cfg);
+  createDotrift(canvas, img.src, cfg);
 }
 
 function init() {
-  document.querySelectorAll('img[data-particle-fx]').forEach(initImage);
+  document.querySelectorAll('img[data-dotrift]').forEach(initImage);
 }
 
 if (document.readyState === 'loading') {

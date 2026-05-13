@@ -1,15 +1,16 @@
-# particle-fx
+# dotrift
 
-Dot-repulsion particle effect for images. Hover to scatter, click to ripple.
+Dot-repulsion particle effect for images.
+Hover to scatter dots, click to send a shockwave ripple.
 
 ---
 
-## The simplest way — just add `data-particle-fx` to any image
+## The simplest way — just add `data-dotrift` to any image
 
 ```html
-<script type="module" src="particle-fx/src/auto-init.js"></script>
+<script type="module" src="dotrift/src/auto-init.js"></script>
 
-<img data-particle-fx src="photo.jpg" />
+<img data-dotrift src="photo.jpg" />
 ```
 
 That's it. The script reads the image's natural size, wraps it in a canvas, and applies the effect automatically. The original image is the placeholder until the canvas is ready — no flash, no layout shift.
@@ -18,7 +19,7 @@ Override any option via data attributes:
 
 ```html
 <img
-  data-particle-fx
+  data-dotrift
   data-grid="80"
   data-repel-radius="40"
   data-ring-strength="0"
@@ -31,7 +32,7 @@ Override any option via data attributes:
 ## Script tag (no bundler)
 
 ```html
-<script src="particle-fx/particle-fx.umd.js"></script>
+<script src="dotrift/dotrift.umd.js"></script>
 
 <img id="photo" src="photo.jpg" />
 
@@ -41,7 +42,7 @@ Override any option via data attributes:
   img.parentNode.insertBefore(canvas, img);
   img.style.display = 'none';
 
-  ParticleFX.create(canvas, img.src, { size: 200, grid: 100 });
+  Dotrift.create(canvas, img.src, { size: 200, grid: 100 });
 </script>
 ```
 
@@ -50,10 +51,10 @@ Override any option via data attributes:
 ## ES module
 
 ```js
-import { createParticleFX } from 'particle-fx';
+import { createDotrift } from 'dotrift';
 
 const canvas = document.querySelector('#my-canvas');
-const fx = createParticleFX(canvas, '/photo.jpg', { size: 200, grid: 100 });
+const fx = createDotrift(canvas, '/photo.jpg', { size: 200, grid: 100 });
 
 // Update live
 fx.set({ repelRadius: 50 });
@@ -67,11 +68,11 @@ fx.destroy();
 ## React
 
 ```jsx
-import { ParticleFXCanvas } from 'particle-fx/react';
+import { DotriftCanvas } from 'dotrift/react';
 
 export default function Profile() {
   return (
-    <ParticleFXCanvas
+    <DotriftCanvas
       src="/photo.jpg"
       size={200}
       grid={110}
@@ -85,10 +86,10 @@ export default function Profile() {
 Or use the hook directly:
 
 ```jsx
-import { useParticleFX } from 'particle-fx/react';
+import { useDotrift } from 'dotrift/react';
 
 export default function Profile() {
-  const ref = useParticleFX('/photo.jpg', { size: 200, grid: 110 });
+  const ref = useDotrift('/photo.jpg', { size: 200, grid: 110 });
   return <canvas ref={ref} style={{ borderRadius: 16 }} />;
 }
 ```
@@ -99,18 +100,18 @@ Works with **TanStack**, **Next.js**, **Remix**, **Vite**, or any React setup.
 
 ## Vue / Svelte / any framework
 
-The core is framework-agnostic. Get a reference to a canvas element and call `createParticleFX`:
+The core is framework-agnostic. Get a reference to a canvas element and call `createDotrift`:
 
 ```js
 // Vue
 import { onMounted, onUnmounted, ref } from 'vue';
-import { createParticleFX } from 'particle-fx';
+import { createDotrift } from 'dotrift';
 
 const canvasRef = ref(null);
 let fx;
 
 onMounted(() => {
-  fx = createParticleFX(canvasRef.value, '/photo.jpg', { size: 200 });
+  fx = createDotrift(canvasRef.value, '/photo.jpg', { size: 200 });
 });
 onUnmounted(() => fx?.destroy());
 ```

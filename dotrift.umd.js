@@ -1,11 +1,11 @@
 /*!
- * particle-fx v1.0.0 — UMD build (script tag / CommonJS / AMD)
- * For ES module usage: import from 'particle-fx'
+ * dotrift v1.0.0 — UMD build (script tag / CommonJS / AMD)
+ * For ES module usage: import from 'dotrift'
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.ParticleFX = factory());
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Dotrift = factory());
 })(this, function () {
 
   const DEFAULTS = {
@@ -15,9 +15,9 @@
     background: null, onReady: null,
   };
 
-  function createParticleFX(canvasEl, imageSource, userConfig) {
+  function createDotrift(canvasEl, imageSource, userConfig) {
     const canvas = typeof canvasEl === 'string' ? document.querySelector(canvasEl) : canvasEl;
-    if (!canvas) throw new Error('ParticleFX: canvas not found');
+    if (!canvas) throw new Error('Dotrift: canvas not found');
 
     const cfg = Object.assign({}, DEFAULTS, userConfig);
     const W = cfg.width || cfg.size, H = cfg.height || cfg.size;
@@ -125,5 +125,5 @@
     };
   }
 
-  return { create: createParticleFX };
+  return { create: createDotrift };
 });

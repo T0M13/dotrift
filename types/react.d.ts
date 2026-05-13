@@ -1,15 +1,15 @@
 import { RefObject, CSSProperties } from 'react';
-import { ParticleFXConfig, ImageSource } from './index.js';
+import { DotriftConfig, ImageSource } from './index.js';
 
-export declare function useParticleFX(
+export declare function useDotrift(
   src: ImageSource,
-  config?: ParticleFXConfig
+  config?: DotriftConfig
 ): RefObject<HTMLCanvasElement>;
 
-export interface ParticleFXCanvasProps extends ParticleFXConfig {
+export interface DotriftCanvasProps extends DotriftConfig {
   src: ImageSource;
   style?: CSSProperties;
   className?: string;
 }
 
-export declare function ParticleFXCanvas(props: ParticleFXCanvasProps): JSX.Element;
+export declare function DotriftCanvas(props: DotriftCanvasProps): JSX.Element;

@@ -1,23 +1,23 @@
 import { useEffect, useRef } from 'react';
-import { createParticleFX } from '../src/particle-fx.js';
+import { createDotrift } from '../src/dotrift.js';
 
 /**
- * useParticleFX(src, config)
+ * useDotrift(src, config)
  *
  * Returns a ref to attach to a <canvas> element.
  * Cleans up automatically on unmount.
  *
  * @example
- * const ref = useParticleFX('/photo.jpg', { grid: 100 });
+ * const ref = useDotrift('/photo.jpg', { grid: 100 });
  * return <canvas ref={ref} style={{ borderRadius: 12 }} />;
  */
-export function useParticleFX(src, config) {
+export function useDotrift(src, config) {
   const canvasRef = useRef(null);
   const instanceRef = useRef(null);
 
   useEffect(() => {
     if (!canvasRef.current || !src) return;
-    instanceRef.current = createParticleFX(canvasRef.current, src, config);
+    instanceRef.current = createDotrift(canvasRef.current, src, config);
     return () => { instanceRef.current?.destroy(); };
   }, [src]);
 
@@ -32,10 +32,10 @@ export function useParticleFX(src, config) {
 }
 
 /**
- * <ParticleFXCanvas> — drop-in component
+ * <DotriftCanvas> — drop-in component
  *
  * @example
- * <ParticleFXCanvas
+ * <DotriftCanvas
  *   src="/photo.jpg"
  *   size={200}
  *   grid={110}
@@ -43,7 +43,7 @@ export function useParticleFX(src, config) {
  *   style={{ borderRadius: 12 }}
  * />
  */
-export function ParticleFXCanvas({ src, style, className, ...config }) {
-  const ref = useParticleFX(src, config);
+export function DotriftCanvas({ src, style, className, ...config }) {
+  const ref = useDotrift(src, config);
   return <canvas ref={ref} style={style} className={className} />;
 }

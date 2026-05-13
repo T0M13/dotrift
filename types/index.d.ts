@@ -1,4 +1,4 @@
-export interface ParticleFXConfig {
+export interface DotriftConfig {
   /** Canvas display size in px. Used for width and height when those are not set. Default: 200 */
   size?: number;
   /** Canvas width in px. Overrides size. Use for non-square. */
@@ -31,9 +31,9 @@ export interface ParticleFXConfig {
   onReady?: () => void;
 }
 
-export interface ParticleFXInstance {
+export interface DotriftInstance {
   /** Update any config value live without re-mounting. */
-  set(config: Partial<ParticleFXConfig>): void;
+  set(config: Partial<DotriftConfig>): void;
   /** Stop the animation and remove all event listeners. */
   destroy(): void;
 }
@@ -47,14 +47,14 @@ export type ImageSource = string | HTMLImageElement | HTMLCanvasElement;
  * @param source  Image URL, HTMLImageElement, or HTMLCanvasElement
  * @param config  Optional configuration
  */
-export declare function createParticleFX(
+export declare function createDotrift(
   canvas: HTMLCanvasElement | string,
   source: ImageSource,
-  config?: ParticleFXConfig
-): ParticleFXInstance;
+  config?: DotriftConfig
+): DotriftInstance;
 
-export declare const ParticleFX: {
-  create: typeof createParticleFX;
+export declare const Dotrift: {
+  create: typeof createDotrift;
 };
 
-export default createParticleFX;
+export default createDotrift;

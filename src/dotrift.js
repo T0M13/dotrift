@@ -16,12 +16,12 @@ const DEFAULTS = {
   onReady:     null,
 };
 
-export function createParticleFX(canvasEl, imageSource, userConfig) {
+export function createDotrift(canvasEl, imageSource, userConfig) {
   const canvas = typeof canvasEl === 'string'
     ? document.querySelector(canvasEl)
     : canvasEl;
 
-  if (!canvas) throw new Error('ParticleFX: canvas not found');
+  if (!canvas) throw new Error('Dotrift: canvas not found');
 
   const cfg = Object.assign({}, DEFAULTS, userConfig);
   const W   = cfg.width  || cfg.size;
@@ -232,5 +232,5 @@ export function createParticleFX(canvasEl, imageSource, userConfig) {
 }
 
 // Legacy namespace API — keeps <script> tag usage working
-export const ParticleFX = { create: createParticleFX };
-export default createParticleFX;
+export const Dotrift = { create: createDotrift };
+export default createDotrift;

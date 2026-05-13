@@ -1,5 +1,5 @@
 {
-  "name": "particle-fx",
+  "name": "dotrift",
   "version": "1.0.0",
   "description": "Dot-repulsion particle effect for images. Works with vanilla JS, React, Vue, Svelte, and any framework.",
   "author": "Tamas Illes",
@@ -8,13 +8,13 @@
     "canvas", "particles", "animation", "hover", "effect",
     "react", "vue", "svelte", "interactive"
   ],
-  "main": "./particle-fx.umd.js",
-  "module": "./src/particle-fx.js",
+  "main": "./dotrift.umd.js",
+  "module": "./src/dotrift.js",
   "types": "./types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/particle-fx.js",
-      "require": "./particle-fx.umd.js",
+      "import": "./src/dotrift.js",
+      "require": "./dotrift.umd.js",
       "types": "./types/index.d.ts"
     },
     "./react": {
@@ -26,7 +26,7 @@
     "src",
     "react",
     "types",
-    "particle-fx.umd.js",
+    "dotrift.umd.js",
     "README.md"
   ],
   "peerDependencies": {
