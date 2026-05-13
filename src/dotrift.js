@@ -29,8 +29,9 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const transparent = !cfg.background || cfg.background === 'transparent';
 
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
+  canvas.style.width       = W + 'px';
+  canvas.style.height      = H + 'px';
+  canvas.style.touchAction = 'none';
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
 
@@ -186,15 +187,16 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
 
   function onMove(e) {
-    if (e.pointerType && e.pointerType !== 'mouse') return;
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
     mouseY  = (e.clientY - r.top)  * (H / r.height);
     if (!mouseOn) { mouseOn = true; smX = mouseX; smY = mouseY; }
     startLoop();
   }
-  function onLeave(e) {
-    if (e.pointerType && e.pointerType !== 'mouse') return;
+  function onLeave() {
+    mouseOn = false;
+  }
+  function onUp() {
     mouseOn = false;
   }
   function onClick(e) {
@@ -210,6 +212,8 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerleave', onLeave);
+  canvas.addEventListener('pointerup', onUp);
+  canvas.addEventListener('pointercancel', onUp);
   canvas.addEventListener('click', onClick);
 
   loadImage(imageSource);
@@ -226,6 +230,8 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       if (rafId) cancelAnimationFrame(rafId);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerleave', onLeave);
+      canvas.removeEventListener('pointerup', onUp);
+      canvas.removeEventListener('pointercancel', onUp);
       canvas.removeEventListener('click', onClick);
     },
   };
