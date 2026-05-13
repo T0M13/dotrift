@@ -2,7 +2,7 @@ const DEFAULTS = {
   size:          200,
   width:         null,
   height:        null,
-  grid:          120,
+  grid:          150,
   dotSize:       1.2,
   repelRadius:   25,
   repelForce:    22,

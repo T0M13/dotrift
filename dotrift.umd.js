@@ -9,7 +9,7 @@
 })(this, function () {
 
   const DEFAULTS = {
-    size: 200, width: null, height: null, grid: 120, dotSize: 1.2,
+    size: 200, width: null, height: null, grid: 150, dotSize: 1.2,
     repelRadius: 25, repelForce: 22, friction: 0.5, spring: 0.004,
     ringStrength: 3, ringSpeed: 180, ringWidth: 14, ringDuration: 900,
     idleAnimation: false, idleStrength: 1, idleSpeed: 1, idleDelay: 2000,
