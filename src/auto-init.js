@@ -40,9 +40,13 @@ function initImage(img) {
   const wrap = document.createElement('div');
   wrap.style.cssText = `position:relative;width:${W}px;height:${H}px;display:inline-block;`;
 
-  // Copy border-radius from img
+  // Copy relevant styles from img to wrapper
   const computed = window.getComputedStyle(img);
   if (computed.borderRadius) wrap.style.borderRadius = computed.borderRadius;
+  if (computed.marginTop)    wrap.style.marginTop    = computed.marginTop;
+  if (computed.marginBottom) wrap.style.marginBottom = computed.marginBottom;
+  if (computed.marginLeft)   wrap.style.marginLeft   = computed.marginLeft;
+  if (computed.marginRight)  wrap.style.marginRight  = computed.marginRight;
   wrap.style.overflow = 'hidden';
 
   img.parentNode.insertBefore(wrap, img);
