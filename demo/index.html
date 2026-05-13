@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dotrift — live demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      background: #0a0a0a;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #555;
+      letter-spacing: 0.04em;
+    }
+
+    a {
+      color: #666;
+      text-decoration: none;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    a:hover { color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>dotrift</h1>
+
+  <img
+    data-dotrift
+    data-grid="110"
+    data-dot-size="1.1"
+    data-repel-radius="22"
+    data-repel-force="25"
+    data-ring-strength="3"
+    crossorigin="anonymous"
+    src="https://tamas-illes.com/wp-content/uploads/2024/12/tomi_lowpoly.webp"
+    alt="dotrift demo"
+    style="width:180px;height:180px;border-radius:40px;"
+  />
+
+  <p class="hint">hover to scatter · click to shockwave</p>
+  <a href="https://github.com/T0M13/dotrift">github.com/T0M13/dotrift</a>
+
+  <script type="module" src="../src/auto-init.js"></script>
+</body>
+</html>

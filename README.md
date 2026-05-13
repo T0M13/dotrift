@@ -4,6 +4,9 @@
 
 <h1 align="center">dotrift</h1>
 <p align="center">Dot-repulsion particle effect for images.</p>
+<p align="center">
+  <a href="https://t0m13.github.io/dotrift/demo/"><strong>→ Live demo</strong></a>
+</p>
 Hover to scatter dots, click to send a shockwave ripple.
 
 ---
