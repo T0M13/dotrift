@@ -47,7 +47,8 @@ function initImage(img) {
   if (computed.marginBottom) wrap.style.marginBottom = computed.marginBottom;
   if (computed.marginLeft)   wrap.style.marginLeft   = computed.marginLeft;
   if (computed.marginRight)  wrap.style.marginRight  = computed.marginRight;
-  wrap.style.overflow = 'hidden';
+  wrap.style.overflow    = 'hidden';
+  wrap.style.touchAction = 'none';
 
   img.parentNode.insertBefore(wrap, img);
   wrap.appendChild(img);
