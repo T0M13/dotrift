@@ -186,6 +186,17 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     if (!rafId && !destroyed) rafId = requestAnimationFrame(tick);
   }
 
+  function onDown(e) {
+    canvas.setPointerCapture(e.pointerId);
+    const r = canvas.getBoundingClientRect();
+    mouseX = (e.clientX - r.left) * (W / r.width);
+    mouseY = (e.clientY - r.top)  * (H / r.height);
+    mouseOn = true; smX = mouseX; smY = mouseY;
+    if (cfg.ringStrength) {
+      shockwaves.push({ x: mouseX, y: mouseY, t: performance.now() });
+    }
+    startLoop();
+  }
   function onMove(e) {
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
@@ -201,6 +212,8 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
   function onClick(e) {
     if (!cfg.ringStrength) return;
+    // desktop click — touch shockwave is handled in onDown
+    if (e.pointerType === 'touch') return;
     const r = canvas.getBoundingClientRect();
     shockwaves.push({
       x: (e.clientX - r.left) * (W / r.width),
@@ -210,6 +223,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     startLoop();
   }
 
+  canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerleave', onLeave);
   canvas.addEventListener('pointerup', onUp);
@@ -228,6 +242,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     destroy() {
       destroyed = true;
       if (rafId) cancelAnimationFrame(rafId);
+      canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerleave', onLeave);
       canvas.removeEventListener('pointerup', onUp);
