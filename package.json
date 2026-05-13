@@ -1,0 +1,39 @@
+{
+  "name": "particle-fx",
+  "version": "1.0.0",
+  "description": "Dot-repulsion particle effect for images. Works with vanilla JS, React, Vue, Svelte, and any framework.",
+  "author": "Tamas Illes",
+  "license": "MIT",
+  "keywords": [
+    "canvas", "particles", "animation", "hover", "effect",
+    "react", "vue", "svelte", "interactive"
+  ],
+  "main": "./particle-fx.umd.js",
+  "module": "./src/particle-fx.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/particle-fx.js",
+      "require": "./particle-fx.umd.js",
+      "types": "./types/index.d.ts"
+    },
+    "./react": {
+      "import": "./react/index.jsx",
+      "types": "./types/react.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "react",
+    "types",
+    "particle-fx.umd.js",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  },
+  "sideEffects": false
+}
