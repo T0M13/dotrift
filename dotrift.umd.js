@@ -99,14 +99,6 @@
 
     function startLoop() { if (!rafId && !destroyed) rafId = requestAnimationFrame(tick); }
 
-    function onDown(e) {
-      canvas.setPointerCapture(e.pointerId);
-      const r = canvas.getBoundingClientRect();
-      mouseX = (e.clientX-r.left)*(W/r.width); mouseY = (e.clientY-r.top)*(H/r.height);
-      mouseOn = true; smX = mouseX; smY = mouseY;
-      if (cfg.ringStrength) shockwaves.push({ x: mouseX, y: mouseY, t: performance.now() });
-      startLoop();
-    }
     function onMove(e) {
       const r = canvas.getBoundingClientRect();
       mouseX = (e.clientX-r.left)*(W/r.width); mouseY = (e.clientY-r.top)*(H/r.height);
@@ -114,25 +106,42 @@
       startLoop();
     }
     function onLeave() { mouseOn = false; }
-    function onUp() { mouseOn = false; }
     function onClick(e) {
-      if (!cfg.ringStrength || e.pointerType === 'touch') return;
+      if (!cfg.ringStrength) return;
       const r = canvas.getBoundingClientRect();
       shockwaves.push({ x:(e.clientX-r.left)*(W/r.width), y:(e.clientY-r.top)*(H/r.height), t:performance.now() });
       startLoop();
     }
+    function getPos(t) {
+      const r = canvas.getBoundingClientRect();
+      return { x:(t.clientX-r.left)*(W/r.width), y:(t.clientY-r.top)*(H/r.height) };
+    }
+    function onTouchStart(e) {
+      e.preventDefault();
+      const p = getPos(e.touches[0]);
+      mouseX = p.x; mouseY = p.y; mouseOn = true; smX = p.x; smY = p.y;
+      if (cfg.ringStrength) shockwaves.push({ x:p.x, y:p.y, t:performance.now() });
+      startLoop();
+    }
+    function onTouchMove(e) {
+      e.preventDefault();
+      const p = getPos(e.touches[0]);
+      mouseX = p.x; mouseY = p.y; startLoop();
+    }
+    function onTouchEnd() { mouseOn = false; }
 
-    canvas.addEventListener('pointerdown', onDown);
-    canvas.addEventListener('pointermove', onMove);
-    canvas.addEventListener('pointerleave', onLeave);
-    canvas.addEventListener('pointerup', onUp);
-    canvas.addEventListener('pointercancel', onUp);
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseleave', onLeave);
     canvas.addEventListener('click', onClick);
+    canvas.addEventListener('touchstart',  onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove',   onTouchMove,  { passive: false });
+    canvas.addEventListener('touchend',    onTouchEnd);
+    canvas.addEventListener('touchcancel', onTouchEnd);
     loadImage(imageSource);
 
     return {
       set(newCfg) { const g = newCfg.grid && newCfg.grid !== cfg.grid; Object.assign(cfg, newCfg); g ? rebuild() : startLoop(); },
-      destroy() { destroyed=true; if(rafId)cancelAnimationFrame(rafId); canvas.removeEventListener('pointerdown',onDown); canvas.removeEventListener('pointermove',onMove); canvas.removeEventListener('pointerleave',onLeave); canvas.removeEventListener('pointerup',onUp); canvas.removeEventListener('pointercancel',onUp); canvas.removeEventListener('click',onClick); },
+      destroy() { destroyed=true; if(rafId)cancelAnimationFrame(rafId); canvas.removeEventListener('mousemove',onMove); canvas.removeEventListener('mouseleave',onLeave); canvas.removeEventListener('click',onClick); canvas.removeEventListener('touchstart',onTouchStart); canvas.removeEventListener('touchmove',onTouchMove); canvas.removeEventListener('touchend',onTouchEnd); canvas.removeEventListener('touchcancel',onTouchEnd); },
     };
   }
 

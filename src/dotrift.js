@@ -186,17 +186,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     if (!rafId && !destroyed) rafId = requestAnimationFrame(tick);
   }
 
-  function onDown(e) {
-    canvas.setPointerCapture(e.pointerId);
-    const r = canvas.getBoundingClientRect();
-    mouseX = (e.clientX - r.left) * (W / r.width);
-    mouseY = (e.clientY - r.top)  * (H / r.height);
-    mouseOn = true; smX = mouseX; smY = mouseY;
-    if (cfg.ringStrength) {
-      shockwaves.push({ x: mouseX, y: mouseY, t: performance.now() });
-    }
-    startLoop();
-  }
+  // — Mouse (pointer events) —
   function onMove(e) {
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
@@ -204,16 +194,9 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     if (!mouseOn) { mouseOn = true; smX = mouseX; smY = mouseY; }
     startLoop();
   }
-  function onLeave() {
-    mouseOn = false;
-  }
-  function onUp() {
-    mouseOn = false;
-  }
+  function onLeave() { mouseOn = false; }
   function onClick(e) {
     if (!cfg.ringStrength) return;
-    // desktop click — touch shockwave is handled in onDown
-    if (e.pointerType === 'touch') return;
     const r = canvas.getBoundingClientRect();
     shockwaves.push({
       x: (e.clientX - r.left) * (W / r.width),
@@ -223,12 +206,37 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     startLoop();
   }
 
-  canvas.addEventListener('pointerdown', onDown);
-  canvas.addEventListener('pointermove', onMove);
-  canvas.addEventListener('pointerleave', onLeave);
-  canvas.addEventListener('pointerup', onUp);
-  canvas.addEventListener('pointercancel', onUp);
+  // — Touch events (mobile) —
+  function getPos(touch) {
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (touch.clientX - r.left) * (W / r.width),
+      y: (touch.clientY - r.top)  * (H / r.height),
+    };
+  }
+  function onTouchStart(e) {
+    e.preventDefault();
+    const p = getPos(e.touches[0]);
+    mouseX = p.x; mouseY = p.y;
+    mouseOn = true; smX = p.x; smY = p.y;
+    if (cfg.ringStrength) shockwaves.push({ x: p.x, y: p.y, t: performance.now() });
+    startLoop();
+  }
+  function onTouchMove(e) {
+    e.preventDefault();
+    const p = getPos(e.touches[0]);
+    mouseX = p.x; mouseY = p.y;
+    startLoop();
+  }
+  function onTouchEnd() { mouseOn = false; }
+
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseleave', onLeave);
   canvas.addEventListener('click', onClick);
+  canvas.addEventListener('touchstart',  onTouchStart, { passive: false });
+  canvas.addEventListener('touchmove',   onTouchMove,  { passive: false });
+  canvas.addEventListener('touchend',    onTouchEnd);
+  canvas.addEventListener('touchcancel', onTouchEnd);
 
   loadImage(imageSource);
 
@@ -242,12 +250,13 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     destroy() {
       destroyed = true;
       if (rafId) cancelAnimationFrame(rafId);
-      canvas.removeEventListener('pointerdown', onDown);
-      canvas.removeEventListener('pointermove', onMove);
-      canvas.removeEventListener('pointerleave', onLeave);
-      canvas.removeEventListener('pointerup', onUp);
-      canvas.removeEventListener('pointercancel', onUp);
-      canvas.removeEventListener('click', onClick);
+      canvas.removeEventListener('mousemove',    onMove);
+      canvas.removeEventListener('mouseleave',   onLeave);
+      canvas.removeEventListener('click',        onClick);
+      canvas.removeEventListener('touchstart',   onTouchStart);
+      canvas.removeEventListener('touchmove',    onTouchMove);
+      canvas.removeEventListener('touchend',     onTouchEnd);
+      canvas.removeEventListener('touchcancel',  onTouchEnd);
     },
   };
 }
