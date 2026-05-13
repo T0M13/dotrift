@@ -12,7 +12,7 @@
     size: 200, width: null, height: null, grid: 120, dotSize: 1.2,
     repelRadius: 25, repelForce: 22, friction: 0.5, spring: 0.004,
     ringStrength: 3, ringSpeed: 180, ringWidth: 14, ringDuration: 900,
-    idleAnimation: false, idleStrength: 1, idleSpeed: 1,
+    idleAnimation: false, idleStrength: 1, idleSpeed: 1, idleDelay: 2000,
     background: null, onReady: null,
   };
 
@@ -33,6 +33,7 @@
     let count = 0, ox, oy, dx, dy, vx, vy, colors, idlePhases, srcCanvas = null;
     let mouseX = -9999, mouseY = -9999, mouseOn = false, smX = -9999, smY = -9999;
     let shockwaves = [], rafId = null, destroyed = false, firstFrame = true;
+    let idleBlend = 0, lastInteraction = performance.now();
 
     function rebuild() {
       if (!srcCanvas) return;
@@ -77,8 +78,8 @@
       if (mouseOn) { smX += (mouseX - smX) * 0.18; smY += (mouseY - smY) * 0.18; }
       transparent ? ctx.clearRect(0, 0, W, H) : (ctx.fillStyle = cfg.background, ctx.fillRect(0, 0, W, H));
       const step = W / cfg.grid, dotR = step * cfg.dotSize;
-      const { repelRadius: RR, repelForce: RF, friction: FR, spring: SP, ringStrength: SS, ringSpeed: SV, ringWidth: SW, ringDuration: SDur, idleAnimation: IA, idleStrength: IS, idleSpeed: IV } = cfg;
-      if (IA) needsAnim = true;
+      const { repelRadius: RR, repelForce: RF, friction: FR, spring: SP, ringStrength: SS, ringSpeed: SV, ringWidth: SW, ringDuration: SDur, idleAnimation: IA, idleStrength: IS, idleSpeed: IV, idleDelay: ID } = cfg;
+      if (IA) { const idleReady=ts-lastInteraction>ID; idleBlend+=(( idleReady?1:0)-idleBlend)*(idleReady?0.04:0.12); if(idleBlend>0.001)needsAnim=true; }
       const idleT = ts * 0.001 * IV;
       for (let i = 0; i < count; i++) {
         let fx = 0, fy = 0;
@@ -94,9 +95,9 @@
         }
         if (IA) {
           const ph = idlePhases[i];
-          if (IA === 'drift') { fx += Math.cos(idleT + ph) * IS * 0.08; fy += Math.sin(idleT * 0.8 + ph + 1.5) * IS * 0.08; }
-          else if (IA === 'breathe') { const pulse=Math.sin(idleT*Math.PI*0.5),ex=ox[i]-W*0.5,ey=oy[i]-H*0.5,d=Math.sqrt(ex*ex+ey*ey)||1; fx+=(ex/d)*pulse*IS*0.3; fy+=(ey/d)*pulse*IS*0.3; }
-          else if (IA === 'wave') { fx+=Math.sin(idleT*2-(oy[i]/H)*Math.PI*4)*IS*0.3; fy+=Math.sin(idleT*2-(ox[i]/W)*Math.PI*4)*IS*0.5; }
+          if (IA === 'drift') { fx += Math.cos(idleT + ph) * IS * 0.08 * idleBlend; fy += Math.sin(idleT * 0.8 + ph + 1.5) * IS * 0.08 * idleBlend; }
+          else if (IA === 'breathe') { const pulse=Math.sin(idleT*Math.PI*0.5),ex=ox[i]-W*0.5,ey=oy[i]-H*0.5,d=Math.sqrt(ex*ex+ey*ey)||1; fx+=(ex/d)*pulse*IS*0.3*idleBlend; fy+=(ey/d)*pulse*IS*0.3*idleBlend; }
+          else if (IA === 'wave') { fx+=Math.sin(idleT*2-(oy[i]/H)*Math.PI*4)*IS*0.3*idleBlend; fy+=Math.sin(idleT*2-(ox[i]/W)*Math.PI*4)*IS*0.5*idleBlend; }
         }
         fx -= dx[i]*SP*10; fy -= dy[i]*SP*10;
         vx[i]=(vx[i]+fx)*FR; vy[i]=(vy[i]+fy)*FR; dx[i]+=vx[i]; dy[i]+=vy[i];
@@ -110,6 +111,7 @@
     function startLoop() { if (!rafId && !destroyed) rafId = requestAnimationFrame(tick); }
 
     function onMove(e) {
+      lastInteraction = performance.now();
       const r = canvas.getBoundingClientRect();
       mouseX = (e.clientX-r.left)*(W/r.width); mouseY = (e.clientY-r.top)*(H/r.height);
       if (!mouseOn) { mouseOn = true; smX = mouseX; smY = mouseY; }
@@ -117,6 +119,7 @@
     }
     function onLeave() { mouseOn = false; }
     function onClick(e) {
+      lastInteraction = performance.now();
       if (!cfg.ringStrength) return;
       const r = canvas.getBoundingClientRect();
       shockwaves.push({ x:(e.clientX-r.left)*(W/r.width), y:(e.clientY-r.top)*(H/r.height), t:performance.now() });
@@ -128,6 +131,7 @@
     }
     function onTouchStart(e) {
       e.preventDefault();
+      lastInteraction = performance.now();
       const p = getPos(e.touches[0]);
       mouseX = p.x; mouseY = p.y; mouseOn = true; smX = p.x; smY = p.y;
       if (cfg.ringStrength) shockwaves.push({ x:p.x, y:p.y, t:performance.now() });
@@ -135,6 +139,7 @@
     }
     function onTouchMove(e) {
       e.preventDefault();
+      lastInteraction = performance.now();
       const p = getPos(e.touches[0]);
       mouseX = p.x; mouseY = p.y; startLoop();
     }

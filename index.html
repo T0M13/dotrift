@@ -120,7 +120,18 @@
       const reader = new FileReader();
       reader.onload = function (e) {
         const img = new Image();
-        img.onload = function () { load(img); };
+        img.onload = function () {
+          // crop to square (object-fit: cover) before passing in
+          const crop = document.createElement('canvas');
+          crop.width = SIZE; crop.height = SIZE;
+          const cc = crop.getContext('2d');
+          const scale = Math.max(SIZE / img.naturalWidth, SIZE / img.naturalHeight);
+          const sw = SIZE / scale, sh = SIZE / scale;
+          const sx = (img.naturalWidth  - sw) / 2;
+          const sy = (img.naturalHeight - sh) / 2;
+          cc.drawImage(img, sx, sy, sw, sh, 0, 0, SIZE, SIZE);
+          load(crop);
+        };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);

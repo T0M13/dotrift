@@ -26,6 +26,7 @@ const ATTR_MAP = {
   'data-idle-animation': ['idleAnimation', String],
   'data-idle-strength':  ['idleStrength',  Number],
   'data-idle-speed':     ['idleSpeed',     Number],
+  'data-idle-delay':     ['idleDelay',     Number],
   'data-background':     ['background',    String],
 };
 

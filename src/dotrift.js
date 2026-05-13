@@ -15,6 +15,7 @@ const DEFAULTS = {
   idleAnimation: false,   // false | 'drift' | 'breathe' | 'wave'
   idleStrength:  1,        // amplitude multiplier
   idleSpeed:     1,        // speed multiplier
+  idleDelay:     2000,     // ms of no interaction before idle starts
   background:    null,
   onReady:       null,
 };
@@ -48,6 +49,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   let rafId = null;
   let destroyed = false;
   let firstFrame = true;
+  let idleBlend = 0, lastInteraction = performance.now();
 
   function rebuild() {
     if (!srcCanvas) return;
@@ -134,9 +136,13 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     const dotR = step * cfg.dotSize;
     const { repelRadius: RR, repelForce: RF, friction: FR, spring: SP,
             ringStrength: SS, ringSpeed: SV, ringWidth: SW, ringDuration: SDur,
-            idleAnimation: IA, idleStrength: IS, idleSpeed: IV } = cfg;
+            idleAnimation: IA, idleStrength: IS, idleSpeed: IV, idleDelay: ID } = cfg;
 
-    if (IA) needsAnim = true;
+    if (IA) {
+      const idleReady = ts - lastInteraction > ID;
+      idleBlend += ((idleReady ? 1 : 0) - idleBlend) * (idleReady ? 0.04 : 0.12);
+      if (idleBlend > 0.001) needsAnim = true;
+    }
     const idleT = ts * 0.001 * IV;
 
     for (let i = 0; i < count; i++) {
@@ -167,20 +173,20 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
         }
       }
 
-      if (IA) {
+      if (IA && idleBlend > 0.001) {
         const ph = idlePhases[i];
         if (IA === 'drift') {
-          fx += Math.cos(idleT + ph)              * IS * 0.08;
-          fy += Math.sin(idleT * 0.8 + ph + 1.5) * IS * 0.08;
+          fx += Math.cos(idleT + ph)              * IS * 0.08 * idleBlend;
+          fy += Math.sin(idleT * 0.8 + ph + 1.5) * IS * 0.08 * idleBlend;
         } else if (IA === 'breathe') {
           const pulse = Math.sin(idleT * Math.PI * 0.5);
           const ex = ox[i] - W * 0.5, ey = oy[i] - H * 0.5;
           const d  = Math.sqrt(ex * ex + ey * ey) || 1;
-          fx += (ex / d) * pulse * IS * 0.3;
-          fy += (ey / d) * pulse * IS * 0.3;
+          fx += (ex / d) * pulse * IS * 0.3 * idleBlend;
+          fy += (ey / d) * pulse * IS * 0.3 * idleBlend;
         } else if (IA === 'wave') {
-          fx += Math.sin(idleT * 2 - (oy[i] / H) * Math.PI * 4) * IS * 0.3;
-          fy += Math.sin(idleT * 2 - (ox[i] / W) * Math.PI * 4) * IS * 0.5;
+          fx += Math.sin(idleT * 2 - (oy[i] / H) * Math.PI * 4) * IS * 0.3 * idleBlend;
+          fy += Math.sin(idleT * 2 - (ox[i] / W) * Math.PI * 4) * IS * 0.5 * idleBlend;
         }
       }
 
@@ -214,6 +220,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
   // — Mouse (pointer events) —
   function onMove(e) {
+    lastInteraction = performance.now();
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
     mouseY  = (e.clientY - r.top)  * (H / r.height);
@@ -222,6 +229,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
   function onLeave() { mouseOn = false; }
   function onClick(e) {
+    lastInteraction = performance.now();
     if (!cfg.ringStrength) return;
     const r = canvas.getBoundingClientRect();
     shockwaves.push({
@@ -242,6 +250,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
   function onTouchStart(e) {
     e.preventDefault();
+    lastInteraction = performance.now();
     const p = getPos(e.touches[0]);
     mouseX = p.x; mouseY = p.y;
     mouseOn = true; smX = p.x; smY = p.y;
@@ -250,6 +259,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
   function onTouchMove(e) {
     e.preventDefault();
+    lastInteraction = performance.now();
     const p = getPos(e.touches[0]);
     mouseX = p.x; mouseY = p.y;
     startLoop();
