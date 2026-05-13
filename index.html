@@ -27,43 +27,104 @@
       text-transform: uppercase;
     }
 
+    #canvas-wrap {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      border-radius: 40px;
+      overflow: hidden;
+    }
+
     .hint {
       font-size: 0.78rem;
       color: #555;
       letter-spacing: 0.04em;
     }
 
+    .upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 1rem;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: #555;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      user-select: none;
+    }
+    .upload-label:hover { border-color: #444; color: #aaa; }
+    .upload-label svg { flex-shrink: 0; }
+    #file-input { display: none; }
+
     a {
-      color: #666;
+      color: #444;
       text-decoration: none;
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       letter-spacing: 0.04em;
       transition: color 0.2s;
     }
-    a:hover { color: #aaa; }
+    a:hover { color: #888; }
   </style>
 </head>
 <body>
   <h1>dotrift</h1>
 
-  <img
-    data-dotrift
-    data-grid="110"
-    data-dot-size="1.1"
-    data-repel-radius="22"
-    data-repel-force="25"
-    data-ring-strength="3"
-    data-idle-animation="drift"
-    data-idle-strength="1"
-    data-idle-speed="1"
-    src="demo/portrait.webp"
-    alt="dotrift demo"
-    style="width:180px;height:180px;border-radius:40px;"
-  />
+  <div id="canvas-wrap">
+    <canvas id="demo-canvas"></canvas>
+  </div>
 
   <p class="hint">hover · swipe · click — always alive</p>
+
+  <label class="upload-label" for="file-input">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    try your own image
+  </label>
+  <input type="file" id="file-input" accept="image/*" />
+
   <a href="https://github.com/T0M13/dotrift">github.com/T0M13/dotrift</a>
 
-  <script type="module" src="src/auto-init.js"></script>
+  <script type="module">
+    import { createDotrift } from './src/dotrift.js';
+
+    const canvas = document.getElementById('demo-canvas');
+    const wrap   = document.getElementById('canvas-wrap');
+    const SIZE   = 180;
+
+    const CONFIG = {
+      width: SIZE, height: SIZE,
+      grid: 110, dotSize: 1.1,
+      repelRadius: 22, repelForce: 25,
+      ringStrength: 3,
+      idleAnimation: 'drift', idleStrength: 1, idleSpeed: 1,
+    };
+
+    let instance = null;
+
+    function load(source) {
+      if (instance) { instance.destroy(); instance = null; }
+      instance = createDotrift(canvas, source, CONFIG);
+    }
+
+    load('demo/portrait.webp');
+
+    document.getElementById('file-input').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () { load(img); };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
 </body>
 </html>
