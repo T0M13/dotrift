@@ -59,7 +59,7 @@ function initImage(img) {
 
   cfg.onReady = () => { img.style.display = 'none'; };
 
-  createDotrift(canvas, img.src, cfg);
+  createDotrift(canvas, img, cfg);
 }
 
 function init() {
