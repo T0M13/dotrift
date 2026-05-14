@@ -123,7 +123,6 @@ function initText(el) {
   const wrap = document.createElement('div');
   wrap.style.cssText = `position:relative;width:${W}px;height:${H}px;display:inline-block;touch-action:none;`;
 
-  const computed = window.getComputedStyle(el);
   if (computed.marginTop)    wrap.style.marginTop    = computed.marginTop;
   if (computed.marginBottom) wrap.style.marginBottom = computed.marginBottom;
   if (computed.marginLeft)   wrap.style.marginLeft   = computed.marginLeft;
