@@ -261,18 +261,6 @@
     </div>
 
     <div class="ctrl-group">
-      <div class="ctrl-group-label">gravity</div>
-
-      <div class="ctrl-row">
-        <div class="ctrl-row-inner">
-          <label>strength</label>
-          <input type="range" id="sl-gravity" min="0" max="1" step="0.02" value="0">
-        </div>
-        <span class="val" id="val-gravity">0</span>
-      </div>
-    </div>
-
-    <div class="ctrl-group">
       <div class="ctrl-group-label">shockwave</div>
 
       <div class="ctrl-row">
@@ -377,7 +365,6 @@
     bindSlider('dotSize',     'dotSize',     v => v.toFixed(1));
     bindSlider('repelRadius', 'repelRadius', null);
     bindSlider('repelForce',  'repelForce',  null);
-    bindSlider('gravity',     'gravity',     v => v.toFixed(2));
     bindSlider('ringStrength','ringStrength',v => v % 1 === 0 ? v : v.toFixed(1));
     bindSlider('idleStrength','idleStrength',v => v.toFixed(1));
     bindSlider('idleSpeed',   'idleSpeed',   v => v.toFixed(1));

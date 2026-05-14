@@ -17,7 +17,6 @@ const DEFAULTS = {
   idleSpeed:     1,        // speed multiplier
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
-  gravity:       0,        // downward acceleration in px/frame². 0 = off. ~0.1 droops gently, ~0.5 drips.
   background:    null,
   onReady:       null,
 };
@@ -267,7 +266,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
       fx -= dx[i] * SP * 10;
       fy -= dy[i] * SP * 10;
-      if (cfg.gravity) fy += cfg.gravity;
 
       vx[i] = (vx[i] + fx) * FR;
       vy[i] = (vy[i] + fy) * FR;

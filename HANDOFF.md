@@ -230,13 +230,13 @@ TypeScript types are at `./types/index.d.ts` and `./types/react.d.ts`.
 ## Planned features (priority order)
 
 1. **Multi-touch** — each finger its own independent repel field
-2. **Swipe trail** — trail of disturbance following swipe path, not just the current finger position
-3. **Attract mode** — pull dots toward cursor instead of repelling (toggle or separate option)
-4. **Double tap** — stronger shockwave burst on double tap
-5. **Color shift on interaction** — dots near cursor brighten or hue-shift
-6. **Dot size variation** — slightly randomize individual dot sizes for organic look
-7. **Gravity** — dots drift downward and spring back
-8. **Inertia on fast swipe** — swipe velocity maps to repel force magnitude
+2. **Attract mode** — pull dots toward cursor instead of repelling (toggle or separate option)
+3. **Double tap** — stronger shockwave burst on double tap
+4. **Color shift on interaction** — dots near cursor brighten or hue-shift
+5. **Dot size variation** — slightly randomize individual dot sizes for organic look
+6. **Inertia on fast swipe** — swipe velocity maps to repel force magnitude
+
+> Tried and rejected: **swipe trail** (visually confusing on small canvases), **gravity** (looked dead/static).
 
 ---
 
