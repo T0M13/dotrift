@@ -16,6 +16,7 @@ const DEFAULTS = {
   idleStrength:  1,        // amplitude multiplier
   idleSpeed:     1,        // speed multiplier
   idleDelay:     2000,     // ms of no interaction before idle starts
+  globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
   background:    null,
   onReady:       null,
 };
@@ -301,17 +302,40 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     startLoop();
   }
   function onLeave() { mouseOn = false; }
-  function onClick(e) {
-    lastInteraction = performance.now();
+
+  function emitRipple(clientX, clientY) {
     if (!cfg.ringStrength) return;
+    const t = performance.now();
+    if (cfg.globalRipples) {
+      const bus = getBus();
+      if (bus) { bus.broadcast({ clientX, clientY, t }); return; }
+    }
     const r = canvas.getBoundingClientRect();
     shockwaves.push({
-      x: (e.clientX - r.left) * (W / r.width),
-      y: (e.clientY - r.top)  * (H / r.height),
-      t: performance.now(),
+      x: (clientX - r.left) * (W / r.width),
+      y: (clientY - r.top)  * (H / r.height),
+      t,
     });
     startLoop();
   }
+
+  function receiveRipple(evt) {
+    if (!cfg.ringStrength) return;
+    const r = canvas.getBoundingClientRect();
+    shockwaves.push({
+      x: (evt.clientX - r.left) * (W / r.width),
+      y: (evt.clientY - r.top)  * (H / r.height),
+      t: evt.t,
+    });
+    startLoop();
+  }
+
+  function onClick(e) {
+    lastInteraction = performance.now();
+    emitRipple(e.clientX, e.clientY);
+  }
+
+  const busUnsub = cfg.globalRipples && getBus() ? getBus().subscribe(receiveRipple) : null;
 
   // — Touch events (mobile) —
   function getPos(touch) {
@@ -327,7 +351,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     const p = getPos(e.touches[0]);
     mouseX = p.x; mouseY = p.y;
     mouseOn = true; smX = p.x; smY = p.y;
-    if (cfg.ringStrength) shockwaves.push({ x: p.x, y: p.y, t: performance.now() });
+    emitRipple(e.touches[0].clientX, e.touches[0].clientY);
     startLoop();
   }
   function onTouchMove(e) {
@@ -359,6 +383,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     destroy() {
       destroyed = true;
       if (rafId) cancelAnimationFrame(rafId);
+      if (busUnsub) busUnsub();
       canvas.removeEventListener('mousemove',    onMove);
       canvas.removeEventListener('mouseleave',   onLeave);
       canvas.removeEventListener('click',        onClick);
@@ -368,6 +393,19 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       canvas.removeEventListener('touchcancel',  onTouchEnd);
     },
   };
+}
+
+// Shared ripple bus — instances with globalRipples:true subscribe and broadcast here.
+function getBus() {
+  if (typeof window === 'undefined') return null;
+  if (!window.__dotriftBus) {
+    const subs = new Set();
+    window.__dotriftBus = {
+      subscribe(fn)   { subs.add(fn);    return () => subs.delete(fn); },
+      broadcast(evt)  { subs.forEach(fn => fn(evt)); },
+    };
+  }
+  return window.__dotriftBus;
 }
 
 // Legacy namespace API — keeps <script> tag usage working
