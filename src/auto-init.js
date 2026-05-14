@@ -38,10 +38,6 @@ const ATTR_MAP = {
   'data-idle-speed':     ['idleSpeed',     Number],
   'data-idle-delay':     ['idleDelay',     Number],
   'data-global-ripples': ['globalRipples', v => v !== 'false'],
-  'data-trail':          ['trail',         v => v !== 'false'],
-  'data-trail-duration': ['trailDuration', Number],
-  'data-trail-strength': ['trailStrength', Number],
-  'data-trail-max':      ['trailMax',      Number],
   'data-background':     ['background',    String],
 };
 

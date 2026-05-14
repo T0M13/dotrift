@@ -17,10 +17,6 @@ const DEFAULTS = {
   idleSpeed:     1,        // speed multiplier
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
-  trail:         false,    // if true, leave a fading trail of disturbed dots behind the cursor
-  trailDuration: 500,      // ms a trail point lives
-  trailStrength: 1.0,      // repel multiplier per trail point (1 = same as live cursor)
-  trailMax:      24,       // max trail points
   background:    null,
   onReady:       null,
 };
@@ -124,7 +120,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   let srcCanvas = null;
   let mouseX = -9999, mouseY = -9999, mouseOn = false, smX = -9999, smY = -9999;
   let shockwaves = [];
-  let trail = [];
   let rafId = null;
   let destroyed = false;
   let firstFrame = true;
@@ -204,12 +199,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       smY += (mouseY - smY) * 0.18;
     }
 
-    if (cfg.trail) {
-      const tDur = cfg.trailDuration;
-      while (trail.length && ts - trail[0].t > tDur) trail.shift();
-      if (trail.length) needsAnim = true;
-    }
-
     if (transparent) {
       ctx.clearRect(0, 0, W, H);
     } else {
@@ -242,33 +231,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
           const s = 1 - d / RR;
           fx += ex / d * s * s * s * RF;
           fy += ey / d * s * s * s * RF;
-        }
-      }
-
-      let trailHeat = 0;
-      if (cfg.trail && trail.length) {
-        const tDur = cfg.trailDuration;
-        const tStr = cfg.trailStrength;
-        const visR = RR * 3;
-        const visR2 = visR * visR;
-        for (let k = 0; k < trail.length; k++) {
-          const tp = trail[k];
-          const ex = ox[i] + dx[i] - tp.x;
-          const ey = oy[i] + dy[i] - tp.y;
-          const d2 = ex * ex + ey * ey;
-          const fade = 1 - (ts - tp.t) / tDur;
-          if (d2 < RR * RR && d2 > 0.01) {
-            const d = Math.sqrt(d2);
-            const s = 1 - d / RR;
-            const m = s * s * s * RF * fade * tStr;
-            fx += ex / d * m;
-            fy += ey / d * m;
-          }
-          if (d2 < visR2) {
-            const dist = Math.sqrt(d2);
-            const h = fade * (1 - dist / visR);
-            if (h > trailHeat) trailHeat = h;
-          }
         }
       }
 
@@ -312,10 +274,9 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
       if (vx[i] * vx[i] + vy[i] * vy[i] > 0.0004) needsAnim = true;
 
-      const r = trailHeat > 0 ? dotR * (1 + trailHeat * 5) : dotR;
       ctx.fillStyle = colors[i];
       ctx.beginPath();
-      ctx.arc(ox[i] + dx[i], oy[i] + dy[i], r, 0, Math.PI * 2);
+      ctx.arc(ox[i] + dx[i], oy[i] + dy[i], dotR, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -332,18 +293,12 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
 
   // — Mouse (pointer events) —
-  function pushTrail(x, y) {
-    if (!cfg.trail) return;
-    trail.push({ x, y, t: performance.now() });
-    if (trail.length > cfg.trailMax) trail.shift();
-  }
   function onMove(e) {
     lastInteraction = performance.now();
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
     mouseY  = (e.clientY - r.top)  * (H / r.height);
     if (!mouseOn) { mouseOn = true; smX = mouseX; smY = mouseY; }
-    pushTrail(mouseX, mouseY);
     startLoop();
   }
   function onLeave() { mouseOn = false; }
@@ -404,7 +359,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     lastInteraction = performance.now();
     const p = getPos(e.touches[0]);
     mouseX = p.x; mouseY = p.y;
-    pushTrail(p.x, p.y);
     startLoop();
   }
   function onTouchEnd() { mouseOn = false; }

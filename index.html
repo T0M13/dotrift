@@ -322,9 +322,9 @@
   </div>
   <input type="file" id="file-input" accept="image/*" />
 
-  <script type="module" src="./src/auto-init.js?v=trail2"></script>
+  <script type="module" src="./src/auto-init.js"></script>
   <script type="module">
-    import { createDotrift } from './src/dotrift.js?v=trail2';
+    import { createDotrift } from './src/dotrift.js';
 
     const canvas = document.getElementById('demo-canvas');
     const SIZE   = 180;
@@ -336,7 +336,6 @@
       ringStrength: 3,
       idleAnimation: false, idleStrength: 1, idleSpeed: 1, idleDelay: 2000,
       globalRipples: true,
-      trail: true,
     };
 
     let instance = null;
