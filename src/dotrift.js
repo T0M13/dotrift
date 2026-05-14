@@ -17,6 +17,10 @@ const DEFAULTS = {
   idleSpeed:     1,        // speed multiplier
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
+  trail:         false,    // if true, leave a fading trail of disturbed dots behind the cursor
+  trailDuration: 300,      // ms a trail point lives
+  trailStrength: 0.6,      // repel multiplier per trail point (1 = same as live cursor)
+  trailMax:      12,       // max trail points
   background:    null,
   onReady:       null,
 };
@@ -120,6 +124,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   let srcCanvas = null;
   let mouseX = -9999, mouseY = -9999, mouseOn = false, smX = -9999, smY = -9999;
   let shockwaves = [];
+  let trail = [];
   let rafId = null;
   let destroyed = false;
   let firstFrame = true;
@@ -199,6 +204,19 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       smY += (mouseY - smY) * 0.18;
     }
 
+    if (cfg.trail) {
+      if (mouseOn) {
+        const last = trail[trail.length - 1];
+        if (!last || ts - last.t > 16) {
+          trail.push({ x: smX, y: smY, t: ts });
+          if (trail.length > cfg.trailMax) trail.shift();
+        }
+      }
+      const tDur = cfg.trailDuration;
+      while (trail.length && ts - trail[0].t > tDur) trail.shift();
+      if (trail.length) needsAnim = true;
+    }
+
     if (transparent) {
       ctx.clearRect(0, 0, W, H);
     } else {
@@ -231,6 +249,25 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
           const s = 1 - d / RR;
           fx += ex / d * s * s * s * RF;
           fy += ey / d * s * s * s * RF;
+        }
+      }
+
+      if (cfg.trail && trail.length) {
+        const tDur = cfg.trailDuration;
+        const tStr = cfg.trailStrength;
+        for (let k = 0; k < trail.length; k++) {
+          const tp = trail[k];
+          const ex = ox[i] + dx[i] - tp.x;
+          const ey = oy[i] + dy[i] - tp.y;
+          const d2 = ex * ex + ey * ey;
+          if (d2 < RR * RR && d2 > 0.01) {
+            const d = Math.sqrt(d2);
+            const s = 1 - d / RR;
+            const fade = 1 - (ts - tp.t) / tDur;
+            const m = s * s * s * RF * fade * tStr;
+            fx += ex / d * m;
+            fy += ey / d * m;
+          }
         }
       }
 
