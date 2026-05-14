@@ -18,6 +18,12 @@ const DEFAULTS = {
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
   attract:       false,    // if true, cursor pulls dots IN instead of pushing them away
+  multiTapWindow:400,      // ms — rapid taps within this window stack the next shockwave
+  multiTapMax:   5,        // max stacked multiplier
+  chargeDuration:1000,     // ms to reach full charge while held
+  chargeBoost:   3,        // active force is ×(1 + charge × chargeBoost) while held
+  chargeShockBoost: 5,     // release shockwave strength is ×(1 + charge × chargeShockBoost)
+  holdThreshold: 200,      // ms — press shorter than this is a tap, longer is a hold
   background:    null,
   onReady:       null,
 };
@@ -125,6 +131,8 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   let destroyed = false;
   let firstFrame = true;
   let idleBlend = 0, lastInteraction = performance.now();
+  let holding = false, pressStart = 0, pressX = 0, pressY = 0;
+  let tapStreak = 0, lastTapTime = 0;
 
   function rebuild() {
     if (!srcCanvas) return;
@@ -194,6 +202,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
     shockwaves = shockwaves.filter(s => ts - s.t < cfg.ringDuration);
     if (shockwaves.length) needsAnim = true;
+    if (holding) needsAnim = true;
 
     if (mouseOn) {
       smX += (mouseX - smX) * 0.18;
@@ -231,8 +240,12 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
           const d = Math.sqrt(d2);
           const s = 1 - d / RR;
           const sign = cfg.attract ? -1 : 1;
-          fx += ex / d * s * s * s * RF * sign;
-          fy += ey / d * s * s * s * RF * sign;
+          const charge = holding
+            ? Math.min(1, (ts - pressStart) / cfg.chargeDuration)
+            : 0;
+          const boost = 1 + charge * cfg.chargeBoost;
+          fx += ex / d * s * s * s * RF * sign * boost;
+          fy += ey / d * s * s * s * RF * sign * boost;
         }
       }
 
@@ -244,8 +257,9 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
         if (d < 0.1) continue;
         const diff = Math.abs(d - ring);
         if (diff < SW) {
-          fx += ex / d * (1 - diff / SW) * fade * SS;
-          fy += ey / d * (1 - diff / SW) * fade * SS;
+          const str = sw.strength != null ? sw.strength : SS;
+          fx += ex / d * (1 - diff / SW) * fade * str;
+          fy += ey / d * (1 - diff / SW) * fade * str;
         }
       }
 
@@ -305,18 +319,19 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
   function onLeave() { mouseOn = false; }
 
-  function emitRipple(clientX, clientY) {
-    if (!cfg.ringStrength) return;
+  function emitRipple(clientX, clientY, strength) {
+    if (!cfg.ringStrength || !strength) return;
     const t = performance.now();
     if (cfg.globalRipples) {
       const bus = getBus();
-      if (bus) { bus.broadcast({ clientX, clientY, t }); return; }
+      if (bus) { bus.broadcast({ clientX, clientY, t, strength }); return; }
     }
     const r = canvas.getBoundingClientRect();
     shockwaves.push({
       x: (clientX - r.left) * (W / r.width),
       y: (clientY - r.top)  * (H / r.height),
       t,
+      strength,
     });
     startLoop();
   }
@@ -328,14 +343,43 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       x: (evt.clientX - r.left) * (W / r.width),
       y: (evt.clientY - r.top)  * (H / r.height),
       t: evt.t,
+      strength: evt.strength != null ? evt.strength : cfg.ringStrength,
     });
     startLoop();
   }
 
-  function onClick(e) {
+  function onPressStart(clientX, clientY) {
     lastInteraction = performance.now();
-    emitRipple(e.clientX, e.clientY);
+    holding = true;
+    pressStart = lastInteraction;
+    pressX = clientX;
+    pressY = clientY;
+    startLoop();
   }
+
+  function onPressEnd(clientX, clientY) {
+    if (!holding) return;
+    const now = performance.now();
+    const held = now - pressStart;
+    holding = false;
+
+    if (held < cfg.holdThreshold) {
+      const streak = (now - lastTapTime) < cfg.multiTapWindow
+        ? Math.min(tapStreak + 1, cfg.multiTapMax)
+        : 1;
+      tapStreak = streak;
+      lastTapTime = now;
+      emitRipple(clientX, clientY, cfg.ringStrength * streak);
+    } else {
+      const charge = Math.min(1, held / cfg.chargeDuration);
+      const strength = cfg.ringStrength * (1 + charge * cfg.chargeShockBoost);
+      emitRipple(clientX, clientY, strength);
+      tapStreak = 0;
+    }
+  }
+
+  function onMouseDown(e) { onPressStart(e.clientX, e.clientY); }
+  function onMouseUp(e)   { onPressEnd(e.clientX, e.clientY); }
 
   const busUnsub = cfg.globalRipples && getBus() ? getBus().subscribe(receiveRipple) : null;
 
@@ -350,11 +394,11 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   function onTouchStart(e) {
     e.preventDefault();
     lastInteraction = performance.now();
-    const p = getPos(e.touches[0]);
+    const t0 = e.touches[0];
+    const p = getPos(t0);
     mouseX = p.x; mouseY = p.y;
     mouseOn = true; smX = p.x; smY = p.y;
-    emitRipple(e.touches[0].clientX, e.touches[0].clientY);
-    startLoop();
+    onPressStart(t0.clientX, t0.clientY);
   }
   function onTouchMove(e) {
     e.preventDefault();
@@ -363,15 +407,22 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     mouseX = p.x; mouseY = p.y;
     startLoop();
   }
-  function onTouchEnd() { mouseOn = false; }
+  function onTouchEnd(e) {
+    mouseOn = false;
+    const t0 = e.changedTouches && e.changedTouches[0];
+    if (t0) onPressEnd(t0.clientX, t0.clientY);
+    else { holding = false; }
+  }
 
   canvas.addEventListener('mousemove', onMove);
   canvas.addEventListener('mouseleave', onLeave);
-  canvas.addEventListener('click', onClick);
+  canvas.addEventListener('mousedown',  onMouseDown);
+  canvas.addEventListener('mouseup',    onMouseUp);
   canvas.addEventListener('touchstart',  onTouchStart, { passive: false });
   canvas.addEventListener('touchmove',   onTouchMove,  { passive: false });
   canvas.addEventListener('touchend',    onTouchEnd);
   canvas.addEventListener('touchcancel', onTouchEnd);
+  window.addEventListener('mouseup',    onMouseUp);  // catch release outside canvas
 
   loadImage(resolvedSource);
 
@@ -388,11 +439,13 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       if (busUnsub) busUnsub();
       canvas.removeEventListener('mousemove',    onMove);
       canvas.removeEventListener('mouseleave',   onLeave);
-      canvas.removeEventListener('click',        onClick);
+      canvas.removeEventListener('mousedown',    onMouseDown);
+      canvas.removeEventListener('mouseup',      onMouseUp);
       canvas.removeEventListener('touchstart',   onTouchStart);
       canvas.removeEventListener('touchmove',    onTouchMove);
       canvas.removeEventListener('touchend',     onTouchEnd);
       canvas.removeEventListener('touchcancel',  onTouchEnd);
+      window.removeEventListener('mouseup',      onMouseUp);
     },
   };
 }

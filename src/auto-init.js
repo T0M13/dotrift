@@ -38,8 +38,14 @@ const ATTR_MAP = {
   'data-idle-speed':     ['idleSpeed',     Number],
   'data-idle-delay':     ['idleDelay',     Number],
   'data-global-ripples': ['globalRipples', v => v !== 'false'],
-  'data-attract':        ['attract',       v => v !== 'false'],
-  'data-background':     ['background',    String],
+  'data-attract':            ['attract',         v => v !== 'false'],
+  'data-multi-tap-window':   ['multiTapWindow',  Number],
+  'data-multi-tap-max':      ['multiTapMax',     Number],
+  'data-charge-duration':    ['chargeDuration',  Number],
+  'data-charge-boost':       ['chargeBoost',     Number],
+  'data-charge-shock-boost': ['chargeShockBoost',Number],
+  'data-hold-threshold':     ['holdThreshold',   Number],
+  'data-background':         ['background',      String],
 };
 
 function initImage(img) {
