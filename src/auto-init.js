@@ -38,6 +38,7 @@ const ATTR_MAP = {
   'data-idle-speed':     ['idleSpeed',     Number],
   'data-idle-delay':     ['idleDelay',     Number],
   'data-global-ripples': ['globalRipples', v => v !== 'false'],
+  'data-gravity':        ['gravity',       Number],
   'data-background':     ['background',    String],
 };
 
