@@ -18,9 +18,9 @@ const DEFAULTS = {
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
   trail:         false,    // if true, leave a fading trail of disturbed dots behind the cursor
-  trailDuration: 300,      // ms a trail point lives
-  trailStrength: 0.6,      // repel multiplier per trail point (1 = same as live cursor)
-  trailMax:      12,       // max trail points
+  trailDuration: 500,      // ms a trail point lives
+  trailStrength: 1.0,      // repel multiplier per trail point (1 = same as live cursor)
+  trailMax:      24,       // max trail points
   background:    null,
   onReady:       null,
 };
@@ -205,13 +205,6 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     }
 
     if (cfg.trail) {
-      if (mouseOn) {
-        const last = trail[trail.length - 1];
-        if (!last || ts - last.t > 16) {
-          trail.push({ x: smX, y: smY, t: ts });
-          if (trail.length > cfg.trailMax) trail.shift();
-        }
-      }
       const tDur = cfg.trailDuration;
       while (trail.length && ts - trail[0].t > tDur) trail.shift();
       if (trail.length) needsAnim = true;
@@ -330,12 +323,18 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   }
 
   // — Mouse (pointer events) —
+  function pushTrail(x, y) {
+    if (!cfg.trail) return;
+    trail.push({ x, y, t: performance.now() });
+    if (trail.length > cfg.trailMax) trail.shift();
+  }
   function onMove(e) {
     lastInteraction = performance.now();
     const r = canvas.getBoundingClientRect();
     mouseX  = (e.clientX - r.left) * (W / r.width);
     mouseY  = (e.clientY - r.top)  * (H / r.height);
     if (!mouseOn) { mouseOn = true; smX = mouseX; smY = mouseY; }
+    pushTrail(mouseX, mouseY);
     startLoop();
   }
   function onLeave() { mouseOn = false; }
@@ -396,6 +395,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
     lastInteraction = performance.now();
     const p = getPos(e.touches[0]);
     mouseX = p.x; mouseY = p.y;
+    pushTrail(p.x, p.y);
     startLoop();
   }
   function onTouchEnd() { mouseOn = false; }
