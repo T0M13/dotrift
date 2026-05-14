@@ -249,7 +249,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       if (cfg.trail && trail.length) {
         const tDur = cfg.trailDuration;
         const tStr = cfg.trailStrength;
-        const visR = RR * 1.8;
+        const visR = RR * 3;
         const visR2 = visR * visR;
         for (let k = 0; k < trail.length; k++) {
           const tp = trail[k];
@@ -312,7 +312,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
       if (vx[i] * vx[i] + vy[i] * vy[i] > 0.0004) needsAnim = true;
 
-      const r = trailHeat > 0 ? dotR * (1 + trailHeat * 1.6) : dotR;
+      const r = trailHeat > 0 ? dotR * (1 + trailHeat * 5) : dotR;
       ctx.fillStyle = colors[i];
       ctx.beginPath();
       ctx.arc(ox[i] + dx[i], oy[i] + dy[i], r, 0, Math.PI * 2);
