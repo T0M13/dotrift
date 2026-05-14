@@ -240,9 +240,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
           const d = Math.sqrt(d2);
           const s = 1 - d / RR;
           const sign = cfg.attract ? -1 : 1;
-          const charge = holding
-            ? Math.min(1, (ts - pressStart) / cfg.chargeDuration)
-            : 0;
+          const charge = holding ? (ts - pressStart) / cfg.chargeDuration : 0;
           const boost = 1 + charge * cfg.chargeBoost;
           fx += ex / d * s * s * s * RF * sign * boost;
           fy += ey / d * s * s * s * RF * sign * boost;
@@ -371,7 +369,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
       lastTapTime = now;
       emitRipple(clientX, clientY, cfg.ringStrength * streak);
     } else {
-      const charge = Math.min(1, held / cfg.chargeDuration);
+      const charge = held / cfg.chargeDuration;
       const strength = cfg.ringStrength * (1 + charge * cfg.chargeShockBoost);
       emitRipple(clientX, clientY, strength);
       tapStreak = 0;
