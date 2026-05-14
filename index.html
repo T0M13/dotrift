@@ -241,6 +241,14 @@
     </div>
 
     <div class="ctrl-group">
+      <div class="ctrl-group-label">cursor mode</div>
+      <div class="idle-pills">
+        <button data-attract="false" class="active">repel</button>
+        <button data-attract="true">attract</button>
+      </div>
+    </div>
+
+    <div class="ctrl-group">
       <div class="ctrl-group-label">repel</div>
 
       <div class="ctrl-row">
@@ -370,8 +378,20 @@
     bindSlider('idleSpeed',   'idleSpeed',   v => v.toFixed(1));
     bindSlider('idleDelay',   'idleDelay',   v => (v / 1000).toFixed(1) + 's');
 
+    // ── Attract pills ──
+    const attractPills = document.querySelectorAll('.idle-pills button[data-attract]');
+    attractPills.forEach(btn => {
+      btn.addEventListener('click', () => {
+        attractPills.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const on = btn.dataset.attract === 'true';
+        CONFIG.attract = on;
+        instance.set({ attract: on });
+      });
+    });
+
     // ── Idle pills ──
-    const pills       = document.querySelectorAll('.idle-pills button');
+    const pills       = document.querySelectorAll('.idle-pills button[data-mode]');
     const idleSliders = document.getElementById('idle-sliders');
 
     pills.forEach(btn => {

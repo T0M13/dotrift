@@ -17,6 +17,7 @@ const DEFAULTS = {
   idleSpeed:     1,        // speed multiplier
   idleDelay:     2000,     // ms of no interaction before idle starts
   globalRipples: false,    // if true, shockwaves propagate across all dotrift instances on the page
+  attract:       false,    // if true, cursor pulls dots IN instead of pushing them away
   background:    null,
   onReady:       null,
 };
@@ -229,8 +230,9 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
         if (d2 < RR * RR && d2 > 0.01) {
           const d = Math.sqrt(d2);
           const s = 1 - d / RR;
-          fx += ex / d * s * s * s * RF;
-          fy += ey / d * s * s * s * RF;
+          const sign = cfg.attract ? -1 : 1;
+          fx += ex / d * s * s * s * RF * sign;
+          fy += ey / d * s * s * s * RF * sign;
         }
       }
 
