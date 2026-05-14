@@ -245,21 +245,29 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
         }
       }
 
+      let trailHeat = 0;
       if (cfg.trail && trail.length) {
         const tDur = cfg.trailDuration;
         const tStr = cfg.trailStrength;
+        const visR = RR * 1.8;
+        const visR2 = visR * visR;
         for (let k = 0; k < trail.length; k++) {
           const tp = trail[k];
           const ex = ox[i] + dx[i] - tp.x;
           const ey = oy[i] + dy[i] - tp.y;
           const d2 = ex * ex + ey * ey;
+          const fade = 1 - (ts - tp.t) / tDur;
           if (d2 < RR * RR && d2 > 0.01) {
             const d = Math.sqrt(d2);
             const s = 1 - d / RR;
-            const fade = 1 - (ts - tp.t) / tDur;
             const m = s * s * s * RF * fade * tStr;
             fx += ex / d * m;
             fy += ey / d * m;
+          }
+          if (d2 < visR2) {
+            const dist = Math.sqrt(d2);
+            const h = fade * (1 - dist / visR);
+            if (h > trailHeat) trailHeat = h;
           }
         }
       }
@@ -304,9 +312,10 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 
       if (vx[i] * vx[i] + vy[i] * vy[i] > 0.0004) needsAnim = true;
 
+      const r = trailHeat > 0 ? dotR * (1 + trailHeat * 1.6) : dotR;
       ctx.fillStyle = colors[i];
       ctx.beginPath();
-      ctx.arc(ox[i] + dx[i], oy[i] + dy[i], dotR, 0, Math.PI * 2);
+      ctx.arc(ox[i] + dx[i], oy[i] + dy[i], r, 0, Math.PI * 2);
       ctx.fill();
     }
 
