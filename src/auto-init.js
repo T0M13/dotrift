@@ -11,7 +11,17 @@
  * <img data-dotrift data-grid="80" data-repel-radius="40" src="photo.jpg" />
  */
 
-import { createDotrift } from './dotrift.js';
+import { createDotrift, createTextCanvas } from './dotrift.js';
+
+const TEXT_ATTR_MAP = {
+  'data-font':           ['font',          String],
+  'data-color':          ['color',         String],
+  'data-padding':        ['padding',       Number],
+  'data-align':          ['align',         String],
+  'data-letter-spacing': ['letterSpacing', Number],
+  'data-line-height':    ['lineHeight',    Number],
+  'data-text-bg':        ['background',    String],
+};
 
 const ATTR_MAP = {
   'data-grid':           ['grid',          Number],
@@ -67,8 +77,77 @@ function initImage(img) {
   createDotrift(canvas, img, cfg);
 }
 
+function fontFromComputed(cs) {
+  const style   = cs.fontStyle   || 'normal';
+  const variant = cs.fontVariant || 'normal';
+  const weight  = cs.fontWeight  || 'normal';
+  const size    = cs.fontSize    || '16px';
+  const family  = cs.fontFamily  || 'sans-serif';
+  return `${style} ${variant} ${weight} ${size} ${family}`;
+}
+
+function initText(el) {
+  const text = el.getAttribute('data-dotrift-text') || el.textContent.trim();
+  const computed = window.getComputedStyle(el);
+
+  const textOpts = {
+    text,
+    font:  fontFromComputed(computed),
+    color: computed.color || '#000',
+  };
+
+  const lhRaw = parseFloat(computed.lineHeight);
+  const fsRaw = parseFloat(computed.fontSize);
+  if (!Number.isNaN(lhRaw) && !Number.isNaN(fsRaw) && fsRaw > 0) {
+    textOpts.lineHeight = lhRaw / fsRaw;
+  }
+  const lsRaw = parseFloat(computed.letterSpacing);
+  if (!Number.isNaN(lsRaw)) textOpts.letterSpacing = lsRaw;
+  if (computed.textAlign === 'left' || computed.textAlign === 'right' || computed.textAlign === 'center') {
+    textOpts.align = computed.textAlign;
+  }
+
+  for (const [attr, [key, cast]] of Object.entries(TEXT_ATTR_MAP)) {
+    if (el.hasAttribute(attr)) textOpts[key] = cast(el.getAttribute(attr));
+  }
+
+  const textCanvas = createTextCanvas(textOpts);
+  const W = textCanvas.width;
+  const H = textCanvas.height;
+
+  const cfg = { width: W, height: H, background: 'transparent' };
+  for (const [attr, [key, cast]] of Object.entries(ATTR_MAP)) {
+    if (el.hasAttribute(attr)) cfg[key] = cast(el.getAttribute(attr));
+  }
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:relative;width:${W}px;height:${H}px;display:inline-block;touch-action:none;`;
+
+  const computed = window.getComputedStyle(el);
+  if (computed.marginTop)    wrap.style.marginTop    = computed.marginTop;
+  if (computed.marginBottom) wrap.style.marginBottom = computed.marginBottom;
+  if (computed.marginLeft)   wrap.style.marginLeft   = computed.marginLeft;
+  if (computed.marginRight)  wrap.style.marginRight  = computed.marginRight;
+
+  el.parentNode.insertBefore(wrap, el);
+  el.style.display = 'none';
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:absolute;top:0;left:0;';
+  wrap.appendChild(canvas);
+
+  createDotrift(canvas, textCanvas, cfg);
+}
+
 function init() {
   document.querySelectorAll('img[data-dotrift]').forEach(initImage);
+  const textEls = document.querySelectorAll('[data-dotrift-text]');
+  const startText = () => textEls.forEach(initText);
+  if (textEls.length && document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(startText);
+  } else {
+    startText();
+  }
 }
 
 if (document.readyState === 'loading') {
@@ -77,4 +156,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-export { initImage };
+export { initImage, initText };

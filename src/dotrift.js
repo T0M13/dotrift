@@ -20,12 +20,85 @@ const DEFAULTS = {
   onReady:       null,
 };
 
+const TEXT_DEFAULTS = {
+  text:          '',
+  font:          'bold 96px sans-serif',
+  color:         '#000',
+  padding:       0,
+  align:         'center',
+  letterSpacing: 0,
+  lineHeight:    1.2,
+  background:    null,
+};
+
+export function createTextCanvas(opts = {}) {
+  const o = Object.assign({}, TEXT_DEFAULTS, opts);
+  const lines = String(o.text).split('\n');
+
+  const measure = document.createElement('canvas').getContext('2d');
+  measure.font = o.font;
+  if ('letterSpacing' in measure) measure.letterSpacing = o.letterSpacing + 'px';
+
+  const sizeMatch = o.font.match(/(\d+(?:\.\d+)?)px/);
+  const fontSize  = sizeMatch ? parseFloat(sizeMatch[1]) : 16;
+  const lineH     = fontSize * o.lineHeight;
+
+  let maxW = 0;
+  for (const ln of lines) {
+    const w = measure.measureText(ln).width;
+    if (w > maxW) maxW = w;
+  }
+
+  const W = Math.max(1, Math.ceil(maxW + o.padding * 2));
+  const H = Math.max(1, Math.ceil(lineH * lines.length + o.padding * 2));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  if (o.background) {
+    ctx.fillStyle = o.background;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  ctx.font = o.font;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = o.letterSpacing + 'px';
+  ctx.fillStyle    = o.color;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign    = o.align;
+
+  const x = o.align === 'left'  ? o.padding
+          : o.align === 'right' ? W - o.padding
+          : W / 2;
+
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, o.padding + lineH * (i + 0.5));
+  }
+
+  return canvas;
+}
+
+function isTextSpec(s) {
+  return s && typeof s === 'object'
+    && typeof s.text === 'string'
+    && !(s instanceof HTMLElement)
+    && !(s instanceof HTMLCanvasElement);
+}
+
 export function createDotrift(canvasEl, imageSource, userConfig) {
   const canvas = typeof canvasEl === 'string'
     ? document.querySelector(canvasEl)
     : canvasEl;
 
   if (!canvas) throw new Error('Dotrift: canvas not found');
+
+  let resolvedSource = imageSource;
+  if (isTextSpec(imageSource)) {
+    resolvedSource = createTextCanvas(imageSource);
+    userConfig = Object.assign({}, userConfig);
+    if (userConfig.width  == null && userConfig.size == null) userConfig.width  = resolvedSource.width;
+    if (userConfig.height == null && userConfig.size == null) userConfig.height = resolvedSource.height;
+  }
 
   const cfg = Object.assign({}, DEFAULTS, userConfig);
   const W   = cfg.width  || cfg.size;
@@ -274,7 +347,7 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
   canvas.addEventListener('touchend',    onTouchEnd);
   canvas.addEventListener('touchcancel', onTouchEnd);
 
-  loadImage(imageSource);
+  loadImage(resolvedSource);
 
   return {
     set(newCfg) {
@@ -298,5 +371,5 @@ export function createDotrift(canvasEl, imageSource, userConfig) {
 }
 
 // Legacy namespace API — keeps <script> tag usage working
-export const Dotrift = { create: createDotrift };
+export const Dotrift = { create: createDotrift, createTextCanvas };
 export default createDotrift;
