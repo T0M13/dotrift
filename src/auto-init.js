@@ -87,8 +87,13 @@ function fontFromComputed(cs) {
 }
 
 function initText(el) {
-  const text = el.getAttribute('data-dotrift-text') || el.textContent.trim();
+  let text = el.getAttribute('data-dotrift-text') || el.textContent.trim();
   const computed = window.getComputedStyle(el);
+  switch (computed.textTransform) {
+    case 'uppercase':  text = text.toUpperCase(); break;
+    case 'lowercase':  text = text.toLowerCase(); break;
+    case 'capitalize': text = text.replace(/\b\w/g, c => c.toUpperCase()); break;
+  }
 
   const textOpts = {
     text,
