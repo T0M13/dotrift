@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="https://tamas-illes.com/wp-content/uploads/2024/12/tomi_lowpoly.webp" width="140" alt="dotrift — dot-repulsion effect demo" style="border-radius:40px" />
+  <img src="demo/preview-repel.gif"   width="360" alt="dotrift — repel mode demo" />
+  <img src="demo/preview-attract.gif" width="360" alt="dotrift — attract mode demo" />
 </p>
 
 <h1 align="center">dotrift</h1>
