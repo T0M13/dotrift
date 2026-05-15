@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="demo/preview-repel.gif"   width="360" alt="dotrift — repel mode demo" />
-  <img src="demo/preview-attract.gif" width="360" alt="dotrift — attract mode demo" />
+  <img src="demo/preview-repel.gif"   width="260" alt="dotrift — repel mode demo" />
+  <img src="demo/preview-attract.gif" width="260" alt="dotrift — attract mode demo" />
 </p>
 
 <h1 align="center">dotrift</h1>
