@@ -1,9 +1,15 @@
 {
   "name": "dotrift",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Dot-repulsion particle effect for images. Works with vanilla JS, React, Vue, Svelte, and any framework.",
   "author": "Tamas Illes",
   "license": "MIT",
+  "homepage": "https://t0m13.github.io/dotrift/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/T0M13/dotrift.git"
+  },
+  "bugs": "https://github.com/T0M13/dotrift/issues",
   "keywords": [
     "canvas", "particles", "animation", "hover", "effect",
     "react", "vue", "svelte", "interactive"
